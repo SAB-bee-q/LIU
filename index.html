@@ -46,6 +46,9 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outli
 .eyebrow{margin:0;font-family:var(--f-num);font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--muted)}
 h1{margin:6px 0 6px;font-size:clamp(26px,7.2vw,34px);line-height:1.2;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
 .lede{margin:0;color:var(--muted);font-size:14px;max-width:34em}
+.ver{margin:8px 0 0;font-size:12.5px;color:var(--muted)}
+.notice{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:var(--na-soft);font-size:13.5px}
+.notice.soon{background:var(--accent-soft)}
 
 .searchbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg)}
 .searchbar .wrap{padding-block:12px 10px}
@@ -193,6 +196,8 @@ html.locked,html.locked body{overflow:hidden}
   <p class="eyebrow">TAISHIN RICHART CARD · 7+1</p>
   <h1>這筆該切哪個權益？</h1>
   <p class="lede">輸入消費通路，依 Richart 卡權益一覽表找出該切換的權益。餐廳、小吃、飲料店會判斷為全臺餐飲（好饗刷）；查不到的店會依付款方式與是否節假日判斷，並問你是不是餐飲業。</p>
+  <p class="ver">資料依台新 Richart 卡權益一覽（2026/10/27 版）・實際以台新公告為準</p>
+  <p class="notice" id="notice" hidden></p>
 </header>
 
 <div class="searchbar">
@@ -276,6 +281,13 @@ const BEN={
   none:{n:'免切換',top:'1.3%',sub:'保費'}
 };
 const ORDER=['chill','pay','daily','big','feast','digital','travel','holiday'];
+/* 資料版本與 Chill刷 期限：到期後不再推薦 Chill刷 */
+const DATA_DATE='2026/10/27', CHILL_END_TEXT='2026/12/31';
+const CHILL_END=new Date(2027,0,1);   /* 2027/1/1 00:00（手機當地時間）起視為到期 */
+const NOW=window.__TODAY__?new Date(window.__TODAY__):new Date();
+const chillExpired=NOW>=CHILL_END;
+const chillDaysLeft=Math.ceil((CHILL_END-NOW)/86400000);
+if(chillExpired){BEN.chill.top='已到期'; BEN.chill.sub='活動已於 '+CHILL_END_TEXT+' 結束，請確認台新是否延長';}
 const PAY={card:'信用卡／Apple Pay 等',tspay:'台新Pay',linepay:'LINE Pay',fullpay:'全盈+Pay'};
 
 /* ---------- 通路（名稱|別名|別名…） ---------- */
@@ -426,7 +438,7 @@ function rateOf(L,pay){
     if(pay==='card') return {ok:false,why:'需以台新Pay、LINE Pay 或全盈+Pay 綁定付款'};
     return {ok:true,rate:pay==='tspay'?3.8:2.3,where:pay==='tspay'?L.where:PAY[pay]+' 綁定支付'};
   }
-  if(b==='chill'){ if(pay==='fullpay') return {ok:false,why:'全盈+Pay 綁定不適用 Chill刷'}; return {ok:true,rate:L.rate}; }
+  if(b==='chill'){ if(chillExpired) return {ok:false,why:'Chill刷 活動已於 '+CHILL_END_TEXT+' 結束，請確認台新是否延長'}; if(pay==='fullpay') return {ok:false,why:'全盈+Pay 綁定不適用 Chill刷'}; return {ok:true,rate:L.rate}; }
   if(b==='holiday'||b==='none') return {ok:true,rate:L.rate};
   if(pay==='linepay'||pay==='fullpay') return {ok:false,why:PAY[pay]+' 綁定不適用'+BEN[b].n};
   return {ok:true,rate:L.rate};
@@ -458,7 +470,7 @@ const fmt=r=>String(r);
 function btag(b,sub){return '<span class="btag" style="--c:var(--b-'+b+')"><i></i>'+BEN[b].n+(sub?' <span class="sub">'+esc(sub)+'</span>':'')+'</span>';}
 function pickHTML(c){
   const isNone=c.b==='none';
-  return '<div class="pick" style="--c:var(--b-'+c.b+')"><div class="pick-l"><span class="tg" aria-hidden="true"></span><div><strong class="bn">'+BEN[c.b].n+'</strong><span class="wh">'+esc(c.where)+'</span></div></div>'+
+  return '<div class="pick" style="--c:var(--b-'+c.b+')"><div class="pick-l"><span class="tg" aria-hidden="true"></span><div><strong class="bn">'+BEN[c.b].n+'</strong><span class="wh">'+esc(c.where)+(c.b==='chill'?'・活動至 '+CHILL_END_TEXT+(chillDaysLeft<=14?'（剩 '+chillDaysLeft+' 天）':''):'')+'</span></div></div>'+
     '<div class="rate">'+(isNone?'<span class="pre">最高</span>':'')+fmt(c.rate)+'<small>%</small></div></div>';
 }
 function merchantCard(ms,st,opt){
@@ -736,6 +748,11 @@ document.addEventListener('click',e=>{
   window.scrollTo({top:Math.max(0,y),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 });
 window.__richart={search,evaluate,M,st};
+(function(){
+  const n=document.getElementById('notice');
+  if(chillExpired){ n.textContent='Chill刷 的活動期限（'+CHILL_END_TEXT+'）已過，本頁已停止推薦 Chill刷。其他權益依 '+DATA_DATE+' 的權益一覽，可能已有更新，請以台新公告為準。'; n.hidden=false; }
+  else if(chillDaysLeft<=14){ n.textContent='Chill刷 將於 '+CHILL_END_TEXT+' 結束（剩 '+chillDaysLeft+' 天），之後台新可能公布新的權益。'; n.className='notice soon'; n.hidden=false; }
+})();
 rebuildMarks(); buildOverview(); syncControls(); render();
 })();
 </script>
