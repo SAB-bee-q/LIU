@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Richart 權益速查</title>
+<style>
+/* Layout: one narrow column — sticky search on top, verdict card, then the 7+1 reference list. */
+:root{
+  --bg:#F4F3F8; --surface:#FFFFFF; --surface-2:#ECEBF3; --fg:#1A1924; --muted:#646179; --line:#E1DFEA;
+  --accent:#5638E0; --accent-soft:#ECE8FE; --accent-ink:#FFFFFF; --scrim:rgb(20 16 40 / .42);
+  --na:#B9370F; --na-soft:#FCEEE8;
+  --b-chill:#C42E6B; --b-pay:#5E3FE2; --b-daily:#0A717B; --b-big:#925400; --b-feast:#B13F17;
+  --b-digital:#2054BA; --b-travel:#09699A; --b-holiday:#367915; --b-none:#646179;
+  --f-num:"Outfit","PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-body:system-ui,-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei","Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111018; --surface:#1B1A24; --surface-2:#262532; --fg:#EEEDF5; --muted:#A4A1B7; --line:#302E3D;
+    --accent:#9C89FF; --accent-soft:#2A2547; --accent-ink:#14112B; --scrim:rgb(0 0 0 / .62);
+    --na:#FF9268; --na-soft:#3A2017;
+    --b-chill:#FF7CAF; --b-pay:#A996FF; --b-daily:#53C8D0; --b-big:#F0B44E; --b-feast:#FF8B5E;
+    --b-digital:#7DAAFF; --b-travel:#5EC5EF; --b-holiday:#8DD56A; --b-none:#A4A1B7;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111018; --surface:#1B1A24; --surface-2:#262532; --fg:#EEEDF5; --muted:#A4A1B7; --line:#302E3D;
+  --accent:#9C89FF; --accent-soft:#2A2547; --accent-ink:#14112B; --scrim:rgb(0 0 0 / .62);
+  --na:#FF9268; --na-soft:#3A2017;
+  --b-chill:#FF7CAF; --b-pay:#A996FF; --b-daily:#53C8D0; --b-big:#F0B44E; --b-feast:#FF8B5E;
+  --b-digital:#7DAAFF; --b-travel:#5EC5EF; --b-holiday:#8DD56A; --b-none:#A4A1B7;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:640px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.hero{padding-block:26px 6px}
+.eyebrow{margin:0;font-family:var(--f-num);font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--muted)}
+h1{margin:6px 0 6px;font-size:clamp(26px,7.2vw,34px);line-height:1.2;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.lede{margin:0;color:var(--muted);font-size:14px;max-width:34em}
+
+.searchbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg)}
+.searchbar .wrap{padding-block:12px 10px}
+.field{display:flex;align-items:center;gap:8px;height:54px;padding:0 6px 0 14px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;transition:border-color .15s,box-shadow .15s}
+.field:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.field svg{flex:none;color:var(--muted)}
+#q{flex:1;min-width:0;height:100%;border:0;background:transparent;color:var(--fg);font:inherit;font-size:18px;outline:none}
+#q::placeholder{color:var(--muted);opacity:.8}
+#q::-webkit-search-cancel-button{display:none}
+.clear{flex:none;height:38px;padding:0 12px;border:0;border-radius:10px;background:var(--surface-2);color:var(--muted);font-size:14px}
+
+.controls{display:grid;gap:10px;padding-block:2px 6px}
+.ctl-label{display:block;margin-bottom:6px;font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;background:var(--surface-2);border-radius:12px}
+@media (min-width:520px){.seg{grid-template-columns:repeat(4,minmax(0,auto))}}
+.seg button{min-height:38px;padding:6px 10px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-size:14px;line-height:1.25}
+.seg button[aria-checked="true"]{background:var(--surface);color:var(--fg);font-weight:600;box-shadow:0 1px 2px rgb(0 0 0 / .1)}
+.hol{display:inline-flex;align-items:center;gap:10px;justify-self:start;min-height:40px;padding:4px 2px;border:0;background:none;font-size:14px;color:var(--fg)}
+.hol small{color:var(--muted);font-size:12.5px}
+.sw{position:relative;flex:none;width:40px;height:24px;border-radius:99px;background:var(--line);transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgb(0 0 0 / .25);transition:transform .15s}
+.hol[aria-pressed="true"] .sw{background:var(--b-holiday)}
+.hol[aria-pressed="true"] .sw::after{transform:translateX(16px)}
+
+.results{display:grid;gap:12px;padding-block:8px 8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 1px 3px rgb(20 16 40 / .05)}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.who{font-weight:600;font-size:16px;min-width:0;overflow-wrap:anywhere}
+.kind{flex:none;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:1px 8px}
+.kicker{margin:12px 0 6px;font-size:13px;color:var(--muted)}
+.picks{display:grid;gap:8px}
+.pick{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--c) 11%,var(--surface))}
+.pick-l{display:flex;align-items:center;gap:12px;min-width:0}
+.tg{position:relative;flex:none;width:34px;height:20px;border-radius:99px;background:var(--c)}
+.tg::after{content:"";position:absolute;top:3px;right:3px;width:14px;height:14px;border-radius:50%;background:var(--surface)}
+.bn{display:block;font-size:22px;font-weight:700;line-height:1.2;color:var(--c)}
+.wh{display:block;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.rate{flex:none;font-family:var(--f-num);font-size:40px;font-weight:600;line-height:1;color:var(--c);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.rate small{font-size:18px;margin-left:1px;letter-spacing:0}
+.rate .pre{display:block;font-family:var(--f-body);font-size:11px;font-weight:500;color:var(--muted);text-align:right;margin-bottom:2px}
+.alts{margin-top:12px}
+.alts-h{margin:0 0 2px;font-size:12.5px;color:var(--muted)}
+.alts ul{list-style:none;margin:0;padding:0}
+.alts li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.alts li .l{min-width:0}
+.alts li .why{display:block;font-size:12.5px;color:var(--muted)}
+.alts li .r{flex:none;font-family:var(--f-num);font-weight:600;font-variant-numeric:tabular-nums}
+.alts li.off .btag,.alts li.off .r{opacity:.5}
+.alts li.off .r{text-decoration:line-through}
+.btag{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--c);white-space:nowrap}
+.alts li .why.no{color:var(--na)}
+.btag i{position:relative;flex:none;width:20px;height:12px;border-radius:99px;background:var(--c)}
+.btag i::after{content:"";position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--surface)}
+.btag .sub{font-weight:400;color:var(--muted);font-size:13px}
+.tip{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:13.5px}
+.none-note{margin:6px 0 0;font-size:14px;color:var(--na)}
+
+.na .na-word{margin:8px 0 2px;font-size:40px;font-weight:700;line-height:1.15;color:var(--na)}
+.na .na-text{margin:0;color:var(--muted);font-size:14px}
+.hints{list-style:none;margin:14px 0 0;padding:0}
+.hints-h{margin:14px 0 0;font-size:12.5px;color:var(--muted)}
+.hints li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.hints li .r{flex:none}
+.hints li.on{font-weight:600}
+.limit{margin:12px 0 8px;font-size:13px;color:var(--muted)}
+
+.sugg{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:6px 16px 8px}
+.sugg-h{margin:10px 0 2px;font-size:12.5px;color:var(--muted)}
+.row{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border:0;border-top:1px solid var(--line);background:none;text-align:left}
+.row:first-of-type{border-top:0}
+.row .rn{min-width:0;font-size:15px;overflow-wrap:anywhere}
+.row .rb{flex:none;display:inline-flex;align-items:center;gap:8px;font-size:14px}
+.row .rr{font-family:var(--f-num);font-weight:600;font-variant-numeric:tabular-nums;color:var(--c)}
+.sugg-foot{margin:4px 0 6px;font-size:13px;color:var(--muted)}
+.sugg-foot b{color:var(--na)}
+
+.empty{padding:14px 16px 16px;border:1.5px dashed var(--line);border-radius:18px}
+.empty p{margin:0 0 10px;font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;font-size:14px;line-height:1.3}
+.chip:hover{border-color:var(--accent)}
+.chip:active{background:var(--surface-2)}
+
+.overview,.notes{padding-block:22px 4px}
+h2{margin:0 0 4px;font-size:18px;font-weight:700}
+.sec-sub{margin:0 0 10px;font-size:13px;color:var(--muted)}
+details.ben{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+details.ben>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+details.ben>summary::-webkit-details-marker{display:none}
+.sm-l{flex:1;min-width:0}
+.sm-n{display:block;font-size:17px;font-weight:700;color:var(--c)}
+.sm-s{display:block;font-size:12.5px;color:var(--muted)}
+.sm-r{flex:none;font-family:var(--f-num);font-weight:600;font-size:18px;color:var(--c);font-variant-numeric:tabular-nums}
+.chev{flex:none;width:10px;height:10px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
+details[open]>summary .chev{transform:rotate(-135deg) translate(-2px,-2px)}
+.og{padding:0 16px 14px}
+.og+.og{border-top:1px solid var(--line)}
+.og h3{display:flex;justify-content:space-between;gap:12px;margin:12px 0 8px;font-size:14px;font-weight:600}
+.og h3 .r{flex:none;font-family:var(--f-num);color:var(--c);font-variant-numeric:tabular-nums}
+.og p{margin:8px 0 0;font-size:13px;color:var(--muted)}
+details.brands{margin-top:10px}
+details.brands summary{font-size:13px;color:var(--accent);cursor:pointer}
+details.brands .chips{margin-top:8px}
+.notes ul{margin:8px 0 0;padding-left:1.2em;font-size:13.5px;color:var(--muted)}
+.notes li{margin:6px 0}
+.foot{padding-block:18px 32px;font-size:12.5px;color:var(--muted)}
+.foot a{color:var(--accent);overflow-wrap:anywhere}
+
+.by{margin:8px 0 0;font-size:13.5px;color:var(--muted)}
+.fine{display:block;margin:6px 0 0;font-size:12px;color:var(--muted)}
+.btn-pri,.btn-sec,.btn-ghost{min-height:46px;padding:8px 14px;border-radius:12px;font-size:15px;line-height:1.3}
+.btn-pri{border:0;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn-sec{border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.btn-ghost{border:0;background:none;color:var(--muted);font-size:14px}
+.btn-pri:active,.btn-sec:active{opacity:.85}
+.ask-inline{margin-top:14px;padding:12px;border-radius:14px;background:var(--surface-2)}
+.ask-q{margin:0 0 10px;font-size:15px;font-weight:600}
+.ask-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ask-inline .fine{margin-top:8px}
+.linkbtn{border:0;background:none;padding:4px 2px;color:var(--accent);font-size:13px;text-decoration:underline;text-underline-offset:2px}
+.linkbtn.danger{color:var(--na)}
+.sugg-foot .ask-inline{margin-bottom:6px}
+
+.sheet{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;background:var(--scrim)}
+.sheet[hidden]{display:none!important}
+.sheet-card{width:100%;max-width:640px;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -6px 24px rgb(0 0 0 / .18);
+  padding-top:20px;padding-bottom:max(18px,env(safe-area-inset-bottom,0px));padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));
+  animation:up .18s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+.sheet-eyebrow{margin:0;font-size:12.5px;color:var(--na)}
+.sheet-card h3{margin:4px 0 6px;font-size:21px;line-height:1.3;text-wrap:balance;overflow-wrap:anywhere}
+.sheet-text{margin:0 0 16px;font-size:14px;color:var(--muted)}
+.sheet-btns{display:grid;gap:8px}
+html.locked,html.locked body{overflow:hidden}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important}.sheet-card{animation:none}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+
+<header class="hero wrap">
+  <p class="eyebrow">TAISHIN RICHART CARD · 7+1</p>
+  <h1>這筆該切哪個權益？</h1>
+  <p class="lede">輸入消費通路，依 Richart 卡權益一覽表找出該切換的權益。餐廳、小吃、飲料店會判斷為全臺餐飲（好饗刷）；查不到的店會依付款方式與是否節假日判斷，並問你是不是餐飲業。</p>
+</header>
+
+<div class="searchbar">
+  <div class="wrap">
+    <label for="q" class="sr">消費通路名稱</label>
+    <div class="field">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="例如：海底撈、蝦皮、長榮航空" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+      <button id="clear" class="clear" type="button" hidden>清除</button>
+    </div>
+  </div>
+</div>
+
+<section class="controls wrap" aria-label="付款條件">
+  <div>
+    <span class="ctl-label" id="pay-label">付款方式</span>
+    <div class="seg" id="pay" role="radiogroup" aria-labelledby="pay-label">
+      <button type="button" role="radio" id="pay-card" data-pay="card">信用卡／Apple Pay 等</button>
+      <button type="button" role="radio" id="pay-tspay" data-pay="tspay">台新Pay</button>
+      <button type="button" role="radio" id="pay-linepay" data-pay="linepay">LINE Pay</button>
+      <button type="button" role="radio" id="pay-fullpay" data-pay="fullpay">全盈+Pay</button>
+    </div>
+  </div>
+  <button type="button" class="hol" id="hol" aria-pressed="false"><span class="sw" aria-hidden="true"></span><span>今天是節假日 <small id="hol-note"></small></span></button>
+</section>
+
+<section id="out" class="results wrap" aria-live="polite"></section>
+
+<section class="overview wrap" aria-labelledby="ov-h">
+  <h2 id="ov-h">7+1 權益一覽</h2>
+  <p class="sec-sub">點通路名稱可以直接查詢。</p>
+  <div id="ov"></div>
+</section>
+
+<section class="notes wrap" aria-labelledby="nt-h">
+  <h2 id="nt-h">注意事項</h2>
+  <ul>
+    <li>加碼回饋限實體信用卡（含線上輸入卡號）、台新Pay、Apple Pay、Google 錢包或 Samsung Pay 綁定消費。</li>
+    <li>LINE Pay 綁定消費只適用 Chill刷、Pay著刷、假日刷；全盈+Pay 綁定消費只適用 Pay著刷、假日刷。</li>
+    <li>街口支付、台灣pay、My FamiPay、全支付、OPEN錢包、中油Pay 等其他支付工具不適用加碼。</li>
+    <li>天天刷的全家、7-11 限用台新Pay 付款。</li>
+    <li>全臺餐飲不含餐券；指定飯店不含餐券、住宿券等票券。</li>
+    <li>保費免切換、免領券，最高 1.3%；節假日刷保費可切假日刷 2%。</li>
+    <li>Chill刷 活動期間 2026/7/8–2026/12/31。</li>
+    <li>一覽表的好饗刷寫的是「全臺餐飲（不含餐券）」，沒有列店名。本頁收錄的連鎖餐飲品牌、店名含餐飲關鍵字的店、以及你自己標記為餐飲業的店，都是依通路性質補充的判斷；標示「亦屬全臺餐飲」「亦屬海外消費」的項目也是。實際是否回饋，以刷卡時的商店類別為準。</li>
+  </ul>
+</section>
+
+<footer class="foot wrap">
+  資料整理自台新銀行 Richart 卡權益一覽網頁（2026/10/27 列印版）。這是個人查詢工具，不是台新銀行官方服務；實際回饋、上限與活動細節以銀行公告為準。<br>
+  原始網頁：<a href="https://mkp.taishinbank.com.tw/TsCms/marketing/expose/WM_20260708095300794/index.html" target="_blank" rel="noopener">mkp.taishinbank.com.tw</a>
+</footer>
+
+<div id="ask" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="ask-h">
+  <div class="sheet-card">
+    <p class="sheet-eyebrow">權益一覽表找不到這個通路</p>
+    <h3 id="ask-h">這家是餐飲業嗎？</h3>
+    <p class="sheet-text">餐廳、小吃、速食、咖啡廳、手搖飲料店都算（不含餐券）。選「是」會切換到好饗刷 3.3%，之後店名含「<span id="ask-kw"></span>」也會直接判斷為餐飲業。</p>
+    <div class="sheet-btns">
+      <button type="button" class="btn-pri" id="ask-yes" data-ask="yes">是，記為餐飲業</button>
+      <button type="button" class="btn-sec" data-ask="no">不是，記為非餐飲業</button>
+      <button type="button" class="btn-ghost" data-ask="later">先不要回答</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- 權益 ---------- */
+const BEN={
+  chill:{n:'Chill刷',top:'最高10%',sub:'瘋聚會・沉浸娛樂・獨自升級（2026/7/8–12/31）'},
+  pay:{n:'Pay著刷',top:'3.8%',sub:'台新Pay／台新Pay+ 3.8%・LINE Pay／全盈+Pay 2.3%'},
+  daily:{n:'天天刷',top:'3.3%',sub:'日常採買・通勤交通・加油充電・藥妝藥局'},
+  big:{n:'大筆刷',top:'3.3%',sub:'指定百貨・Outlet・居家裝修・時尚品味'},
+  feast:{n:'好饗刷',top:'3.3%',sub:'全臺餐飲・外送・購票・KTV・指定飯店'},
+  digital:{n:'數趣刷',top:'3.3%',sub:'網購・線上課程・遊戲影音・AI 服務'},
+  travel:{n:'玩旅刷',top:'3.3%',sub:'海外消費・航空・海外交通・訂房・旅行社'},
+  holiday:{n:'假日刷',top:'2%',sub:'節假日不限通路（含保費）'},
+  none:{n:'免切換',top:'1.3%',sub:'保費'}
+};
+const ORDER=['chill','pay','daily','big','feast','digital','travel','holiday'];
+const PAY={card:'信用卡／Apple Pay 等',tspay:'台新Pay',linepay:'LINE Pay',fullpay:'全盈+Pay'};
+
+/* ---------- 通路（名稱|別名|別名…） ---------- */
+const G=[
+ {b:'chill',sec:'瘋聚會',label:'歡聚微醺',rate:10,kw:['微醺','酒吧'],items:['詹記麻辣火鍋|詹記','萬客什鍋','海底撈','屋馬燒肉|屋馬','茶六燒肉堂|茶六','新村站著吃','燒肉政宗','碳佐麻里','雞湯大叔','gonna共樂遊|gonna|共樂遊','BRUN 不然|brun','CAFE ACME|cafeacme|acme','The Antipodean|antipodean','貳樓|secondfloor','樂子 the Diner|樂子|thediner','Fake Sober|fakesober','Draft Land|draftland','臺虎精釀(含啜飲室)|臺虎精釀|臺虎|啜飲室','ABV系列|abv','Bar TCRC|bartcrc|tcrc','Bar Home|barhome','Phowa','MOONROCK','台灣代駕','Motodomo 愛車管家|motodomo|愛車管家']},
+ {b:'chill',sec:'瘋聚會',label:'日常續命',rate:10,kw:['手搖飲','手搖','飲料','咖啡'],items:['50嵐|五十嵐','得正','五桐號','龜記','UG TEA|ugtea|ug','叮哥茶飲|叮哥','CAFE!N|cafein|cafen|硬咖啡','%Arabica|arabica','COMPOSE COFFEE|composecoffee|compose']},
+ {b:'chill',sec:'瘋聚會',label:'約會犒賞',rate:5,kw:[],items:['饗饗 INPARADISE|饗饗|inparadise','NAGOMI']},
+ {b:'chill',sec:'沉浸娛樂',label:'應援追星',rate:5,kw:['追星','kpop','韓流'],items:['WEVERSE','K-MONSTAR|kmonstar','微樂客','五大唱片','仙女樹','FANME','NOL|interpark']},
+ {b:'chill',sec:'沉浸娛樂',label:'熬夜追更',rate:5,kw:['追劇','電子書','動漫','漫畫'],items:['巴哈姆特|巴哈|動畫瘋|bahamut','BOOK WALKER|bookwalker','Animate|安利美特','樂天KOBO|kobo','Readmoo讀墨|readmoo|讀墨','Netflix|網飛','Disney+|disneyplus','愛爾達|elta']},
+ {b:'chill',sec:'沉浸娛樂',label:'數位外掛',rate:5,kw:[],items:['Pinkoi']},
+ {b:'chill',sec:'沉浸娛樂',label:'數位外掛',rate:3.3,kw:[],items:['Apple 直營(含官網)|apple|蘋果|applestore|apple官網','Studio A(含Straight A)|studioa|straighta','DJI|大疆','Insta360','GoPro','蝦皮|shopee|蝦皮購物','淘寶|taobao','酷澎(Coupang)|coupang','Uber Eats|ubereats']},
+ {b:'chill',sec:'獨自升級',label:'營養補給',rate:5,kw:['保健食品','乳清','蛋白粉'],items:['好好生醫','POPCARE好在乎|popcare|好在乎','營養師輕食','VITABOX','MYPROTEIN','UrMart優馬選品|urmart|優馬選品|優馬']},
+ {b:'chill',sec:'獨自升級',label:'體態養成',rate:5,kw:['健身','健身房','皮拉提斯','gym'],items:['Anytime Fitness|anytimefitness|anytime','健身工廠','World Gym|worldgym','超核心 Hypercore|超核心|hypercore','KX PILATES|kxpilates','虎鐵健身 X 器械皮拉提斯|虎鐵健身|虎鐵','17FIT']},
+ {b:'chill',sec:'獨自升級',label:'運動品牌',rate:5,kw:['運動鞋','球鞋','運動服','運動用品','慢跑鞋'],items:['Adidas|愛迪達','New Balance|newbalance|nb','PUMA','Onitsuka Tiger|onitsukatiger|onitsuka|鬼塚虎','Nike|耐吉','HOKA','Salomon','lululemon']},
+
+ {b:'pay',label:'台新Pay',rate:3.8,kw:['台新pay'],more:'等，詳見台新Pay官網',items:['全家|familymart|全家便利商店|超商|便利商店','7-11|7eleven|seven|小七|統一超商|超商|便利商店','新光三越|skm|skmpay|新光|三越','Richart Mart|richartmart','康是美|cosmed','IKEA|宜家','NET']},
+ {b:'pay',label:'台新Pay（TWQR、台灣Pay）',rate:3.8,kw:['twqr'],more:'等，詳見台灣Pay場域',items:['神腦|神腦國際','燦坤|燦坤3c','全國電子','麥當勞|mcdonalds|麥當當','美廉社|simplemart','大樹藥局|大樹']},
+ {b:'pay',label:'台新Pay+（日韓交易免1.5%國外交易手續費）',rate:3.8,kw:['台新pay+'],more:'等，詳見台新Pay+官網',items:['日本LAWSON|lawson|羅森','BicCamera|biccamera','韓國GS25|gs25','DAISO(韓國)|daiso']},
+
+ {b:'daily',label:'日常採買',rate:3.3,kw:['日常採買','量販','量販店','超市'],items:[{n:'全家',cond:'tspay'},{n:'7-11',cond:'tspay'},'萬家福|家樂福','樂家康|家樂福超市','大買家','唐吉訶德|驚安殿堂|donki','LOPIA','智生活']},
+ {b:'daily',label:'通勤交通',rate:3.3,kw:['通勤交通','叫車','計程車','小黃'],items:['臺鐵|台灣鐵路|火車','高鐵|台灣高鐵|thsr','台灣大車隊|大車隊|55688','LINEGO','Yoxi','Uber|優步','台灣Bolt|bolt']},
+ {b:'daily',label:'加油充電',rate:3.3,kw:['加油充電','加油','加油站','充電','充電站','停車'],items:['中油直營|中油|台灣中油','全國加油|全國加油站','全國特急電','源點EVOASIS|源點|evoasis','華城電能EVALUE|華城電能|華城|evalue','USPACE','Autopass(車麻吉)|autopass|車麻吉']},
+ {b:'daily',label:'藥妝藥局',rate:3.3,kw:['藥妝藥局','藥妝','藥妝店','藥局','藥房'],items:['寶雅|poya','康是美','屈臣氏|watsons','杏一醫療|杏一','大樹藥局','丁丁藥局|丁丁','佑全保健藥妝|佑全','健康人生藥局|健康人生']},
+
+ {b:'big',label:'指定百貨',rate:3.3,kw:['指定百貨','百貨','百貨公司','購物中心','商場'],items:['新光三越','遠東百貨|遠百|遠東','遠東SOGO|sogo|太平洋sogo','漢神巨蛋','漢神百貨','漢神洲際|漢神洲際購物廣場','微風|微風廣場|微風南山|微風信義|breeze','台北101|101','遠東巨城|巨城|bigcity','廣三SOGO|廣三','南紡購物中心|南紡','誠品生活(含線上)|誠品|誠品線上|誠品書店|eslite','京站|qsquare','三創生活|三創','夢時代|dreammall','統一時代(含DREAM PLAZA)|dreamplaza','中友百貨|中友','Mitsui Shopping Park LaLaport(南港/台中)|lalaport|三井lalaport|三井']},
+ {b:'big',label:'指定Outlet',rate:3.3,kw:['指定outlet','outlet','outlets','暢貨中心'],items:['MITSUI OUTLET PARK(林口/台中港/台南)|三井outlet|三井','華泰名品城|華泰|gloriaoutlets','SKM Park Outlets|skmpark']},
+ {b:'big',label:'居家裝修',rate:3.3,kw:['居家裝修','家具','傢俱','家居','裝修','寢具'],items:['IKEA','特力屋','HOLA|和樂','宜得利|nitori','瑪黑家居|瑪黑']},
+ {b:'big',label:'時尚品味',rate:3.3,kw:['時尚品味','服飾','衣服'],items:['UNIQLO|優衣庫','GU','ZARA','NET','lululemon']},
+
+ {b:'feast',label:'全臺餐飲',rate:3.3,items:[{n:'全臺餐飲(不含餐券)|全臺餐飲|餐飲|餐廳|餐館|用餐|吃飯|美食|小吃|食堂|小館|菜館|早餐|早餐店|早午餐|brunch|午餐|晚餐|宵夜|便當|自助餐|吃到飽|buffet|速食|火鍋|鍋物|涮涮鍋|麻辣鍋|石頭鍋|臭臭鍋|羊肉爐|薑母鴨|燒肉|燒烤|串燒|烤肉|居酒屋|餐酒館|酒館|bistro|熱炒|快炒|海產|牛排|鐵板燒|壽司|定食|丼飯|咖哩|拉麵|麵館|麵店|牛肉麵|麵線|涼麵|義大利麵|烏龍麵|水餃|餃子|鍋貼|小籠包|湯包|粥|滷肉飯|魯肉飯|雞肉飯|排骨飯|控肉飯|鴨肉飯|臭豆腐|蚵仔煎|肉圓|牛肉湯|燒臘|烤鴨|港式|茶餐廳|飲茶|港點|茶樓|酒樓|素食|蔬食|川菜|湘菜|台菜|粵菜|料理|披薩|pizza|漢堡|炸雞|雞排|鹽酥雞|滷味|咖啡廳|咖啡館|咖啡店|cafe|茶飲|飲料店|豆花|冰店|甜點店',cat:true},'王品瘋Pay|王品|瘋pay']},
+ {b:'feast',label:'外送平台',rate:3.3,kw:['外送平台','外送','外賣'],items:['Uber Eats','Foodpanda|熊貓']},
+ {b:'feast',label:'購票娛樂',rate:3.3,kw:['購票娛樂','售票','購票','門票','演唱會'],items:['拓元售票|拓元|tixcraft','KKTIX','年代售票|年代','寬宏售票|寬宏','OPENTIX兩廳院文化生活|opentix|兩廳院','FunNow']},
+ {b:'feast',label:'指定KTV',rate:3.3,kw:['指定ktv','ktv','唱歌'],items:['錢櫃|partyworld','好樂迪','ONCOR','sing!go','享溫馨']},
+ {b:'feast',label:'指定飯店',rate:3.3,kw:['指定飯店','飯店','酒店','住宿'],more:'指定飯店不含餐券、住宿券等票券',
+  items:['晶華國際酒店集團|晶華','雲朗觀光|雲朗','台灣萬豪國際集團旗下飯店|萬豪|marriott','煙波國際觀光集團|煙波','老爺酒店集團|老爺酒店|老爺','福華集團|福華','漢來飯店事業群|漢來','台北君悅酒店|君悅','高雄洲際酒店','臺中勤美洲際酒店|勤美洲際','礁溪寒沐酒店|寒沐'],
+  brands:['台北晶華酒店','礁溪晶泉丰旅','北投晶泉丰旅','台南晶英酒店','太魯閣晶英酒店','蘭城晶英酒店','捷絲旅','君品酒店','雲品溫泉酒店','翰品酒店','兆品酒店','品文旅','台北萬豪酒店','高雄萬豪酒店','W HOTEL|w飯店','台北喜來登大飯店','台北士林萬麗酒店','台北國泰萬怡酒店','台北六福萬怡酒店','林口亞昕福朋喜來登酒店','八里福朋喜來登酒店','桃園喜來登酒店','新竹豐邑喜來登大飯店','宜蘭礁溪福朋喜來登酒店','台東桂田喜來登酒店','澎湖福朋喜來登酒店','然一酒店','台北寒舍艾美酒店','台北賦樂旅居','台北宿之酒店．臻品之選','台北中山雅樂軒酒店','台北北投雅樂軒酒店','台南安平雅樂軒酒店','桃園大溪笠復威斯汀度假酒店','宜蘭力麗威斯汀度假酒店','台中李方艾美酒店','台中萬楓酒店','台中豐邑MOXY酒店','花蓮潔西艾美酒店','煙波花蓮太魯閣','煙波新竹湖濱館','煙波新竹都會館','煙波花蓮館','煙波蘇澳四季雙泉館','煙波宜蘭館','煙波台南館','煙波花時間 宜蘭傳藝','煙波花時間 花蓮','礁溪老爺酒店','知本老爺酒店','新竹老爺酒店','北投老爺酒店','台北老爺酒店','台南老爺行旅','台中大毅老爺行旅','南港老爺行旅','老爺會館台北南西','老爺會館台北林森','台北福華大飯店','石門水庫福華渡假飯店','新竹福華大飯店','台中福華大飯店','溪頭福華渡假飯店','雲林華安大飯店','高雄福華大飯店','墾丁福華渡假飯店','台北漢來大飯店','高雄漢來大飯店','漢來日月行館','台北君悅酒店','臺中勤美洲際酒店','高雄洲際酒店','礁溪寒沐酒店']},
+
+ {b:'digital',label:'網購平台',rate:3.3,kw:['網購平台','網購','購物網','電商'],items:['蝦皮','momo|momo購物網|富邦momo','酷澎(Coupang)','PChome|pchome24h','淘寶','Amazon|亞馬遜','東森|東森購物|etmall','博客來|bookscomtw','Richart Mart','PayEasy','iHerb','SHEIN','Farfetch','Olive Young|oliveyoung']},
+ {b:'digital',label:'線上課程',rate:3.3,kw:['線上課程','課程','線上學習'],items:['知識衛星','Amazing Talker|amazingtalker','Tutor ABC|tutorabc','Hahow|好學校','PressPlay']},
+ {b:'digital',label:'遊戲影音',rate:3.3,kw:['遊戲影音','遊戲','遊戲點數','點數卡','串流','影音'],items:['MyCard','遊戲橘子|gamania','Steam','PlayStation|ps5|ps4|psn','Nintendo|任天堂|switch|eshop','Netflix','Disney+']},
+ {b:'digital',label:'AI服務',rate:3.3,kw:['ai服務','ai','人工智慧'],items:['ChatGPT|openai|gpt','Notion','Canva','Perplexity','Claude|anthropic']},
+
+ {b:'travel',label:'海外消費（含實體及線上、歐洲國家交易）',short:'海外消費',rate:3.3,items:[{n:'海外消費(含實體及線上、歐洲國家交易)|海外消費|海外|國外|出國|國外消費|海外網購|國外網購|跨境|外幣|日本|韓國|泰國|越南|新加坡|香港|澳門|美國|歐洲|英國|法國|德國|義大利|西班牙|澳洲|紐西蘭|加拿大|菲律賓|馬來西亞|印尼',cat:true}]},
+ {b:'travel',label:'航空公司',rate:3.3,kw:['航空公司','航空','機票','飛機'],items:['中華航空|華航|chinaairlines','長榮航空|evaair','星宇航空|星宇|starlux','台灣虎航|虎航|tigerair','國泰航空|cathaypacific|cathay','華信航空|mandarinairlines','立榮航空|立榮|uniair','樂桃航空|樂桃|peach','阿聯酋航空|阿聯酋|emirates','亞洲航空|亞航|airasia','酷航|scoot','捷星航空|捷星|jetstar','新加坡航空|新航|singaporeairlines','日本航空|日航|jal','越捷航空|越捷|vietjet']},
+ {b:'travel',label:'海外交通／網路',rate:3.3,kw:['海外交通','交通卡'],items:['Uber','Grab','SUICA|西瓜卡','ICOCA','PASMO','WOWPASS','AIRSIM']},
+ {b:'travel',label:'訂房平台',rate:3.3,kw:['訂房平台','訂房','訂房網','住宿'],items:['Klook|客路','KKday','Agoda','Booking.com|booking','Trip.com|攜程','Airbnb','Hotels.com','Expedia|智遊網']},
+ {b:'travel',label:'旅行社',rate:3.3,kw:['旅行社','旅遊團','跟團'],items:['雄獅旅遊|雄獅|liontravel','易遊網|eztravel','東南旅遊|東南旅行社','可樂旅遊|colatour','長汎假期|長汎','五福旅遊|五福','喜鴻假期|喜鴻','易飛旅遊|易飛','燦星旅遊|燦星','加利利旅行社|加利利','鳳凰國際旅行社|鳳凰旅遊|鳳凰','山富旅遊|山富','行健旅遊|行健']},
+
+ {b:'holiday',label:'節假日不限通路（含保費）',short:'節假日不限通路',rate:2,items:[{n:'節假日不限通路(含保費)|假日|節假日|週末|周末|國定假日|連假',cat:true}]},
+ {b:'none',label:'保費（免切換、免領券）',rate:1.3,hide:true,items:[{n:'保費|保險|保險費|壽險|產險|車險|保單',cat:true,noPay:true}]}
+];
+/* 依通路性質補充：餐飲類亦屬全臺餐飲、日韓通路亦屬海外消費 */
+const IMPLIED=[
+ ['feast','亦屬全臺餐飲（餐飲類通路）',3.3,['麥當勞','詹記麻辣火鍋','萬客什鍋','海底撈','屋馬燒肉','茶六燒肉堂','新村站著吃','燒肉政宗','碳佐麻里','雞湯大叔','貳樓','樂子 the Diner','饗饗 INPARADISE','50嵐','得正','五桐號','龜記','UG TEA','叮哥茶飲','CAFE!N','%Arabica','COMPOSE COFFEE']],
+ ['travel','亦屬海外消費（日韓當地消費）',3.3,['日本LAWSON','BicCamera','韓國GS25','DAISO(韓國)']]
+];
+
+/* 常見連鎖餐飲品牌：一覽表寫「全臺餐飲（不含餐券）」，這些品牌屬於餐飲業，直接對應好饗刷 */
+const RESTAURANTS=[
+ ['王品集團',['王品集團|王品餐飲','王品牛排','西堤牛排|西堤','陶板屋','原燒','聚北海道昆布鍋|聚北海道|聚鍋','藝奇|ikki','夏慕尼','品田牧場','石二鍋','12MINI','hot 7|hot7|新鐵板料理','青花驕','享鴨','和牛涮','肉次方','尬鍋','莆田|putien','丰禾','乍牛']],
+ ['瓦城泰統集團',['瓦城泰統集團|瓦城泰統','瓦城泰國料理|瓦城','非常泰','1010湘','大心新泰式麵食|大心','時時香','YABI KITCHEN|yabi','月月 Thai BBQ|月月']],
+ ['饗賓餐旅',['饗賓餐旅|饗賓','饗食天堂','果然匯','旭集','開飯川食堂','小福利麻辣鍋|小福利','饗泰多']],
+ ['漢來美食',['漢來海港|海港自助餐','島語','漢來蔬食','上菜片皮鴨','溜溜酸菜魚']],
+ ['築間餐飲',['築間幸福鍋物|築間','燒肉Smile','有之和牛','本格和牛','太將鍋']],
+ ['乾杯集團',['乾杯燒肉|乾杯','老乾杯','黑毛屋']],
+ ['中式・台式',['鼎泰豐|dintaifung','欣葉','京鼎樓','點水樓','杭州小籠湯包','八方雲集','四海遊龍','鬍鬚張','金峰魯肉飯|金峰','三商巧福','梁社漢排骨|梁社漢','悟饕池上飯包|悟饕','正忠排骨','福隆便當','添好運','點點心','春水堂','翰林茶館','金色三麥','涓豆腐']],
+ ['火鍋・燒肉',['鼎王','老四川','馬辣','無老鍋','這一鍋','錢都日式涮涮鍋|錢都','輕井澤鍋物','嗑肉石鍋','千葉火鍋','天外天','肉多多','小蒙牛','寬心園','三媽臭臭鍋','胡同燒肉','燒肉LIKE','牛角','溫野菜','涮乃葉']],
+ ['速食・日韓・西式',['肯德基|kfc','摩斯漢堡|摩斯|mosburger|mos','漢堡王|burgerking','頂呱呱','丹丹漢堡|丹丹','Subway|賽百味','必勝客|pizzahut','達美樂|dominos','拿坡里','21世紀風味館','繼光香香雞|繼光','胖老爹','麥味登','拉亞漢堡|拉亞','弘爺漢堡|弘爺','早安美芝城|美芝城','吉野家|yoshinoya','Sukiya|すき家|食其家','松屋','大戶屋|ootoya','定食8','爭鮮','藏壽司|kura','壽司郎|sushiro','濱壽司|はま壽司|hamasushi','一蘭|ichiran','一風堂|ippudo','屯京拉麵|屯京','花月嵐','鬼金棒','麵屋武藏','銀座杏子豬排|杏子豬排','薄多義','茹絲葵|ruthschris','教父牛排','孫東寶','我家牛排','貴族世家','TGI Fridays|tgifridays','起家雞','校村炸雞|kyochon','bb.q CHICKEN|bbqchicken']],
+ ['咖啡・飲料',['星巴克|starbucks','路易莎|louisa','cama café|cama','85度C|85c','伯朗咖啡|伯朗|mrbrown','丹堤咖啡|丹堤','怡客咖啡|怡客','西雅圖極品咖啡|西雅圖咖啡','黑沃咖啡|黑沃','貢茶|gongcha','清心福全|清心','CoCo都可|coco','迷客夏|milkshop','大苑子','珍煮丹','可不可熟成紅茶|可不可','鶴茶樓','麻古茶坊|麻古','茶湯會','老虎堂','一沐日','先喝道','萬波','康青龍','吃茶三千','樺達奶茶|樺達']]
+];
+
+/* ---------- 正規化 ---------- */
+const PUNCT=/[\-_.,，、·・‧'’"“”!?()\[\]【】{}\/|｜:;&%*~〜。]/g;
+function base(s){return s.normalize('NFKC').toLowerCase().replace(/臺/g,'台').replace(PUNCT,'');}
+function norm(s){return base(s).replace(/\s+/g,'');}
+function normSp(s){return base(s).replace(/\s+/g,' ').trim();}
+const isAsciiKey=k=>/^[a-z0-9+]+$/.test(k);
+const hasCJK=s=>/[^\x00-\x7f]/.test(s);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function reEsc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+
+/* ---------- 建立索引 ---------- */
+const M=new Map(); const ENT=[];
+function whereOf(g){return g.sec?g.sec+'・'+g.label:(g.short||g.label);}
+function addM(raw,listing){
+  const spec=typeof raw==='string'?{n:raw}:raw;
+  const parts=spec.n.split('|'); const name=parts[0];
+  let m=M.get(name);
+  if(!m){m={kind:'m',name,keys:new Set(),L:[]};M.set(name,m);ENT.push(m);}
+  m.keys.add(norm(name));
+  const stripped=norm(name.replace(/[(（][^)）]*[)）]/g,''));
+  if(stripped) m.keys.add(stripped);
+  parts.slice(1).forEach(a=>{const k=norm(a); if(k) m.keys.add(k);});
+  if(spec.cat) m.cat=true;
+  if(spec.noPay) m.noPay=true;
+  if(listing && !m.L.some(x=>x.id===listing.id)) m.L.push(Object.assign({},listing,spec.cond?{cond:spec.cond}:{}));
+}
+G.forEach((g,i)=>{
+  const L={id:'g'+i,b:g.b,rate:g.rate,where:whereOf(g)};
+  g.items.forEach(it=>addM(it,L));
+  (g.brands||[]).forEach(it=>addM(it,L));
+  if(g.kw && g.kw.length && !g.items.some(it=>it.cat)){
+    const keys=new Set(g.kw.map(norm)); keys.add(norm(g.label)); if(g.short) keys.add(norm(g.short));
+    ENT.push({kind:'g',g,gi:i,keys,name:whereOf(g)});
+  }
+});
+IMPLIED.forEach(([b,where,rate,names],i)=>names.forEach(n=>{const m=M.get(n); if(m && !m.L.some(x=>x.id==='imp'+i)) m.L.push({id:'imp'+i,b,rate,where,implied:true});}));
+RESTAURANTS.forEach(([grp,names],i)=>{
+  const L={id:'rest'+i,b:'feast',rate:3.3,where:'全臺餐飲・'+grp};
+  names.forEach(n=>{const ex=M.get(n.split('|')[0]); if(ex && ex.L.some(x=>x.b==='feast')) return; addM(n,L);});
+});
+
+/* ---------- 比對 ---------- */
+function contains(q,qs,k){
+  if(isAsciiKey(k) && k.length<=3){
+    return new RegExp('(^|[^a-z0-9])'+reEsc(k)+'($|[^a-z0-9])').test(qs);
+  }
+  return q.includes(k);
+}
+function search(raw){
+  const q=norm(raw), qs=normSp(raw);
+  if(!q) return null;
+  const hits=[], part=[];
+  for(const e of ENT.concat(markEnts)){
+    let best=null, pb=null;
+    for(const k of e.keys){
+      if(k===q){best={tier:3,k};break;}
+      if(e.kind==='g') continue;
+      if(contains(q,qs,k)){ if(!best||k.length>best.k.length) best={tier:2,k}; }
+      else if(k.includes(q) && (hasCJK(q)||q.length>=2)){
+        const sc=k.startsWith(q)?0:1;
+        if(!pb||sc<pb.sc||(sc===pb.sc&&k.length<pb.k.length)) pb={sc,k};
+      }
+    }
+    if(best) hits.push({e,k:best.k});
+    else if(pb && e.kind==='m') part.push({e,sc:pb.sc,k:pb.k});
+  }
+  const keep=hits.filter(h=>!hits.some(o=>o.e!==h.e && o.k.length>h.k.length && o.k.includes(h.k)));
+  part.sort((a,b)=>a.sc-b.sc||a.k.length-b.k.length);
+  return {q,hits:keep,part:part.slice(0,8).map(p=>p.e)};
+}
+
+/* ---------- 權益判斷 ---------- */
+function rateOf(L,pay){
+  const b=L.b;
+  if(L.cond==='tspay' && pay!=='tspay') return {ok:false,why:'此通路限用台新Pay付款'};
+  if(b==='pay'){
+    if(pay==='card') return {ok:false,why:'需以台新Pay、LINE Pay 或全盈+Pay 綁定付款'};
+    return {ok:true,rate:pay==='tspay'?3.8:2.3,where:pay==='tspay'?L.where:PAY[pay]+' 綁定支付'};
+  }
+  if(b==='chill'){ if(pay==='fullpay') return {ok:false,why:'全盈+Pay 綁定不適用 Chill刷'}; return {ok:true,rate:L.rate}; }
+  if(b==='holiday'||b==='none') return {ok:true,rate:L.rate};
+  if(pay==='linepay'||pay==='fullpay') return {ok:false,why:PAY[pay]+' 綁定不適用'+BEN[b].n};
+  return {ok:true,rate:L.rate};
+}
+const rank=c=>c.virtual?2:c.implied?1:0;
+function evaluate(m,st){
+  const c=m.L.map(L=>{const r=rateOf(L,st.pay); return Object.assign({},L,r,{where:r.where||L.where});});
+  if(st.pay!=='card' && !m.noPay && !m.L.some(L=>L.b==='pay'))
+    c.push({b:'pay',virtual:true,ok:true,rate:st.pay==='tspay'?3.8:2.3,where:PAY[st.pay]+' 綁定支付（不限通路）'});
+  if(st.hol && !m.L.some(L=>L.b==='holiday'))
+    c.push({b:'holiday',virtual:true,ok:true,rate:2,where:'節假日不限通路'});
+  c.sort((a,b)=>(b.ok-a.ok)||((b.rate||0)-(a.rate||0))||(rank(a)-rank(b)));
+  return c;
+}
+function tipFor(m,st,cur){
+  let best=null;
+  for(const p of Object.keys(PAY)){
+    if(p===st.pay) continue;
+    for(const L of m.L){
+      const r=rateOf(L,p);
+      if(r.ok && r.rate>cur && (!best||r.rate>best.rate)) best={p,rate:r.rate,b:L.b};
+    }
+  }
+  return best;
+}
+const fmt=r=>String(r);
+
+/* ---------- 畫面 ---------- */
+function btag(b,sub){return '<span class="btag" style="--c:var(--b-'+b+')"><i></i>'+BEN[b].n+(sub?' <span class="sub">'+esc(sub)+'</span>':'')+'</span>';}
+function pickHTML(c){
+  const isNone=c.b==='none';
+  return '<div class="pick" style="--c:var(--b-'+c.b+')"><div class="pick-l"><span class="tg" aria-hidden="true"></span><div><strong class="bn">'+BEN[c.b].n+'</strong><span class="wh">'+esc(c.where)+'</span></div></div>'+
+    '<div class="rate">'+(isNone?'<span class="pre">最高</span>':'')+fmt(c.rate)+'<small>%</small></div></div>';
+}
+function merchantCard(ms,st,opt){
+  opt=opt||{};
+  const m=ms[0], ev=evaluate(m,st), ok=ev.filter(c=>c.ok);
+  const names=opt.who||(ms.length>6?ms.slice(0,6).map(x=>x.name).join('、')+' 等 '+ms.length+' 個':ms.map(x=>x.name).join('、'));
+  let h='<article class="card"><div class="card-h"><span class="who">'+esc(names)+'</span><span class="kind">'+esc(opt.kind||(m.cat?'類別':'通路'))+'</span></div>';
+  if(opt.note) h+='<p class="by">'+opt.note+'</p>';
+  let top=[];
+  if(ok.length){
+    top=ok.filter(c=>c.rate===ok[0].rate);
+    const seen=new Set(); top=top.filter(c=>{const k=c.b+c.where; if(seen.has(k)) return false; seen.add(k); return true;});
+    let kick='切換到';
+    if(top[0].b==='none') kick='保費不用切換權益';
+    else if(top.length>1) kick='以下權益回饋相同，切任一個都可以';
+    h+='<p class="kicker">'+kick+'</p><div class="picks">'+top.map(pickHTML).join('')+'</div>';
+  }else{
+    h+='<p class="kicker">用'+esc(PAY[st.pay])+'付款時</p><p class="none-note">這個付款方式沒有可用的權益</p>';
+  }
+  const rest=ev.filter(c=>!top.includes(c));
+  if(rest.length){
+    h+='<div class="alts"><p class="alts-h">'+(top.length?'其他權益':'一覽表上的權益')+'</p><ul>'+rest.map(c=>
+      '<li class="'+(c.ok?'':'off')+'"><span class="l">'+btag(c.b)+'<span class="why">'+esc(c.where)+'</span>'+(c.ok?'':'<span class="why no">'+esc(c.why)+'</span>')+'</span><span class="r">'+fmt(c.rate)+'%</span></li>').join('')+'</ul></div>';
+  }
+  const cur=ok.length?ok[0].rate:0;
+  const tp=tipFor(m,st,cur);
+  if(tp) h+='<p class="tip">改用 <b>'+esc(PAY[tp.p])+'</b> 付款，切「'+BEN[tp.b].n+'」可享 <b>'+fmt(tp.rate)+'%</b></p>';
+  return h+'</article>';
+}
+function groupCard(e,st){
+  const g=e.g, r=rateOf({b:g.b,rate:g.rate,where:whereOf(g)},st.pay);
+  let h='<article class="card"><div class="card-h"><span class="who">'+esc(whereOf(g))+'</span><span class="kind">指定通路類別</span></div>';
+  if(r.ok){
+    h+='<p class="kicker">這類消費切換到</p><div class="picks">'+pickHTML({b:g.b,rate:r.rate,where:r.where||whereOf(g)})+'</div>';
+  }else{
+    h+='<p class="kicker">'+btag(g.b,whereOf(g))+' '+fmt(g.rate)+'%</p><p class="none-note">'+esc(r.why)+'</p>';
+  }
+  const list=g.items.map(it=>(typeof it==='string'?it:it.n).split('|')[0]);
+  h+='<p class="limit">只限下列指定通路'+(g.more?'（'+esc(g.more)+'）':'')+'：</p><div class="chips">'+list.map(n=>'<button type="button" class="chip" data-q="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>';
+  return h+'</article>';
+}
+function bestOf(m,st){const ok=evaluate(m,st).filter(c=>c.ok); return ok[0]||null;}
+function suggHTML(list,st,title,foot){
+  let h='<div class="sugg"><p class="sugg-h">'+title+'</p>';
+  h+=list.map(m=>{const b=bestOf(m,st);
+    return '<button type="button" class="row" data-q="'+esc(m.name)+'"><span class="rn">'+esc(m.name)+'</span><span class="rb">'+
+      (b?btag(b.b)+'<span class="rr" style="--c:var(--b-'+b.b+')">'+fmt(b.rate)+'%</span>':'<span class="rr" style="--c:var(--muted)">此付款方式不適用</span>')+'</span></button>';}).join('');
+  if(foot) h+='<p class="sugg-foot">'+foot+'</p>';
+  return h+'</div>';
+}
+/* 一覽表沒列出的店：Pay著刷（綁定支付）與假日刷不限通路，仍可能適用 */
+function freeCands(st){
+  const c=[];
+  if(st.pay!=='card') c.push({b:'pay',rate:st.pay==='tspay'?3.8:2.3,where:PAY[st.pay]+' 綁定支付，不限通路'+(st.pay==='tspay'?'（店家需支援台新Pay）':'')});
+  if(st.hol) c.push({b:'holiday',rate:2,where:'節假日不限通路'});
+  return c.sort((a,b)=>b.rate-a.rate);
+}
+function freeHints(st){
+  const h=[];
+  if(st.pay==='card'||st.pay==='tspay') h.push(['改用 LINE Pay 或全盈+Pay 綁定付款','pay','2.3%']);
+  if(st.pay!=='tspay') h.push(['改用台新Pay 付款（店家有支援時）','pay','3.8%']);
+  if(!st.hol) h.push(['節假日消費，不限通路','holiday','2%']);
+  return h;
+}
+function unlistedCard(raw,st,extra){
+  const free=freeCands(st);
+  let h='<article class="card'+(free.length?'':' na')+'"><div class="card-h"><span class="who">'+esc(raw.trim())+'</span><span class="kind">未列通路</span></div>';
+  if(free.length){
+    const why=free[0].b==='pay'?'用 '+esc(PAY[st.pay])+' 付款，':'今天是節假日，';
+    h+='<p class="by">權益一覽表沒有列出這家，但這個權益不限通路。</p><p class="kicker">'+why+'切換到</p><div class="picks">'+pickHTML(free[0])+'</div>';
+    if(free.length>1) h+='<div class="alts"><p class="alts-h">其他權益</p><ul>'+free.slice(1).map(c=>'<li><span class="l">'+btag(c.b)+'<span class="why">'+esc(c.where)+'</span></span><span class="r">'+fmt(c.rate)+'%</span></li>').join('')+'</ul></div>';
+  }else{
+    h+='<p class="na-word">不適用</p><p class="na-text">權益一覽表沒有列出這家。用信用卡／Apple Pay 等付款、又不是節假日時，沒有可以切換的權益。</p>';
+  }
+  h+=extra||'';
+  const hints=freeHints(st);
+  h+='<p class="hints-h">'+(free.length?'其他可以切換的情況：':'改成下列情況就能切換：')+'</p><ul class="hints">'+
+    hints.map(([t,b,r])=>'<li><span>'+t+'</span><span class="r">'+btag(b)+' '+r+'</span></li>').join('')+
+    (st.pay==='card'||st.pay==='tspay'?'<li><span>如果其實是國內餐廳（全臺餐飲，不含餐券）</span><span class="r">'+btag('feast')+' 3.3%</span></li>'+
+      '<li><span>如果是海外消費（含海外網購）</span><span class="r">'+btag('travel')+' 3.3%</span></li>':'')+
+    '</ul></article>';
+  return h;
+}
+function freeLine(st){
+  const free=freeCands(st);
+  if(free.length) return '如果都不是，這家不在一覽表裡；用目前的付款條件仍可切 <b>'+BEN[free[0].b].n+' '+fmt(free[0].rate)+'%</b>。';
+  return '如果都不是，這家不在一覽表裡，目前的付款條件 <b>不適用</b>。';
+}
+const EXAMPLES=['海底撈','全家','蝦皮','Netflix','新光三越','Uber','長榮航空','ChatGPT','全聯'];
+function render(){
+  const raw=$q.value, out=document.getElementById('out');
+  $clear.hidden=!raw;
+  const res=search(raw);
+  if(!res){
+    out.innerHTML='<div class="empty"><p>試試這些通路</p><div class="chips">'+EXAMPLES.map(n=>'<button type="button" class="chip" data-q="'+n+'">'+n+'</button>').join('')+'</div></div>';
+    return;
+  }
+  const ms=res.hits.filter(h=>h.e.kind==='m').map(h=>h.e);
+  const gs=res.hits.filter(h=>h.e.kind==='g').map(h=>h.e);
+  const primary=new Set(ms);
+  const shown=new Set(); gs.forEach(e=>e.g.items.forEach(it=>shown.add((typeof it==='string'?it:it.n).split('|')[0])));
+  const part=res.part.filter(m=>!primary.has(m) && !shown.has(m.name));
+  let html='';
+  const who=raw.trim();
+  if(ms.length||gs.length){
+    const bySig=new Map(), markHits=[];
+    let byName=[];
+    res.hits.filter(h=>h.e.kind==='m').forEach(({e:m,k})=>{
+      if(m.mark){ markHits.push({m,k}); return; }
+      if(m.cat && k!==res.q){ byName.push(m); return; }   /* 店名含「牛肉麵」「火鍋」等字 */
+      const ev=evaluate(m,st); const ok=ev.filter(c=>c.ok);
+      const sig=JSON.stringify(ev.map(c=>[c.b,c.where,c.ok,c.rate]))+'|'+JSON.stringify(tipFor(m,st,ok.length?ok[0].rate:0))+'|'+!!m.cat;
+      if(!bySig.has(sig)) bySig.set(sig,[]); bySig.get(sig).push(m);
+    });
+    [...bySig.values()].slice(0,6).forEach(arr=>html+=merchantCard(arr,st));
+    markHits.forEach(({m,k})=>html+=merchantCard([m],st,{who,kind:'我標記',
+      note:(k===res.q?'你標記過這家是餐飲業。':'店名含「'+esc(m.name)+'」，你標記過是餐飲業。')+' <button type="button" class="linkbtn" data-unmark="'+esc(m.mkey)+'">取消標記</button>'}));
+    if(markHits.length) byName=[];
+    byName.forEach(m=>html+=merchantCard([m],st,{who,kind:'依店名判斷',note:'店名看起來屬於「'+esc(m.name.replace(/[(（].*$/,''))+'」'}));
+    gs.forEach(e=>html+=groupCard(e,st));
+    if(part.length) html+=suggHTML(part.slice(0,5),st,'相近的通路',null);
+  }else{
+    if(part.length && !marks[res.q]){
+      html+=suggHTML(part,st,'你要找的是不是這些通路？',freeLine(st)+askInline(who,res.q));
+    }else{
+      html+=unlistedCard(raw,st,askInline(who,res.q));
+    }
+  }
+  out.innerHTML=html;
+}
+
+/* ---------- 自己標記的餐飲業（之後的判斷都會用到） ---------- */
+const MARK_KEY='richart-marks-v1';
+let marks={};                 /* key -> {name, food, at, synced} */
+let markEnts=[], skipAsk=new Set();
+let store=null, uid=null;
+try{const o=JSON.parse(localStorage.getItem(MARK_KEY)||'{}'); if(o && typeof o==='object') marks=o;}catch(e){marks={};}
+function saveLocal(){try{localStorage.setItem(MARK_KEY,JSON.stringify(marks));}catch(e){}}
+function rebuildMarks(){
+  markEnts=Object.entries(marks).filter(([k,v])=>v && v.food===true).map(([k,v])=>({kind:'m',name:v.name,mark:true,mkey:k,keys:new Set([k]),
+    L:[{id:'mark',b:'feast',rate:3.3,where:'全臺餐飲（你標記為餐飲業）'}]}));
+}
+function docId(k){let h=0x811c9dc5; for(const ch of k){h^=ch.codePointAt(0); h=Math.imul(h,0x01000193)>>>0;} return 'mark-'+h.toString(36)+'-'+k.length;}
+async function pushMark(k){
+  if(!store||!uid) return;
+  const v=marks[k];
+  try{
+    const ref=store.collection('data/users/'+uid).doc(docId(k));
+    if(v) await ref.set({kind:'mark',key:k,name:v.name,food:!!v.food,at:v.at});
+    else await ref.delete();
+    if(marks[k]){marks[k].synced=true; saveLocal();}
+  }catch(e){ /* 沒同步成功：標記仍留在這台裝置，下次開啟時再補上傳 */ }
+}
+const chains={};
+function queuePush(k){chains[k]=(chains[k]||Promise.resolve()).then(()=>pushMark(k));}
+function setMark(name,food){
+  const nm=String(name||'').trim().slice(0,40), k=norm(nm); if(!k) return;
+  marks[k]={name:nm,food:!!food,at:Date.now(),synced:false};
+  saveLocal(); rebuildMarks(); render(); queuePush(k);
+}
+function removeMark(k){ if(!marks[k]) return; delete marks[k]; saveLocal(); rebuildMarks(); render(); queuePush(k); }
+function askInline(who,key){
+  const m=marks[key];
+  if(m && m.food===false) return '<div class="ask-inline"><p class="ask-q">你標記過「'+esc(m.name)+'」不是餐飲業。</p><div class="ask-btns"><button type="button" class="btn-sec" data-setmark="1" data-name="'+esc(who)+'">改成餐飲業</button><button type="button" class="btn-sec" data-unmark="'+esc(key)+'">清除標記</button></div></div>';
+  if(key.length<2) return '';
+  return '<div class="ask-inline"><p class="ask-q">這家是餐飲業嗎？</p><div class="ask-btns"><button type="button" class="btn-pri" data-setmark="1" data-name="'+esc(who)+'">是，記為餐飲業</button><button type="button" class="btn-sec" data-setmark="0" data-name="'+esc(who)+'">不是</button></div>'+
+    '<p class="fine">選「是」會切好饗刷 3.3%，之後店名含「'+esc(who)+'」也會直接判斷為餐飲業。</p></div>';
+}
+/* 有帳號時存到自己的私人資料（換裝置也在），沒有就只存在本機 */
+(async()=>{
+  try{
+    if(!(window.claude && typeof window.claude.use==='function')) return;
+    const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+    if(!db||!user) return;
+    const id=await user.id(); if(!id) return;
+    store=db; uid=id;
+    const col=db.collection('data/users/'+uid);
+    const snap=await col.get();
+    const remote={}; snap.docs.forEach(d=>{const v=d.data(); if(v && v.kind==='mark' && typeof v.key==='string') remote[v.key]=1;});
+    for(const k of Object.keys(marks)){ if(!marks[k].synced && !remote[k]) await pushMark(k); }
+    col.onSnapshot(s=>{
+      const next={};
+      s.docs.forEach(d=>{const v=d.data(); if(v && v.kind==='mark' && typeof v.key==='string') next[v.key]={name:String(v.name||v.key).slice(0,40),food:!!v.food,at:Number(v.at)||0,synced:true};});
+      Object.keys(marks).forEach(k=>{ if(!marks[k].synced && !next[k]) next[k]=marks[k]; });
+      marks=next; saveLocal(); rebuildMarks(); render();
+    },()=>{ /* 同步中斷：繼續使用本機的標記 */ });
+  }catch(e){ store=null; uid=null; }
+})();
+
+/* ---------- 詢問視窗 ---------- */
+let askName='';
+function maybeAsk(){
+  const raw=$q.value.trim(); const res=search(raw);
+  if(!res || res.hits.length || res.part.length || res.q.length<2) return;
+  if(marks[res.q] || skipAsk.has(res.q) || !$ask.hidden) return;
+  askName=raw;
+  document.getElementById('ask-h').textContent='「'+raw+'」是餐飲業嗎？';
+  document.getElementById('ask-kw').textContent=raw;
+  $ask.hidden=false; document.documentElement.classList.add('locked');
+  document.getElementById('ask-yes').focus({preventScroll:true});
+}
+function closeAsk(skip){
+  if($ask.hidden) return;
+  $ask.hidden=true; document.documentElement.classList.remove('locked');
+  if(skip) skipAsk.add(norm(askName));
+}
+
+/* ---------- 權益一覽 ---------- */
+function buildOverview(){
+  const ov=document.getElementById('ov');
+  ov.innerHTML=ORDER.map(b=>{
+    const gs=G.filter(g=>g.b===b && !g.hide);
+    let body=gs.map(g=>{
+      const items=g.items.map(it=>(typeof it==='string'?it:it.n).split('|')[0]);
+      let s='<div class="og" style="--c:var(--b-'+b+')"><h3><span>'+esc(g.sec?g.sec+'・'+g.label:g.label)+'</span><span class="r">'+fmt(g.rate)+'%</span></h3><div class="chips">'+
+        items.map(n=>'<button type="button" class="chip" data-q="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>';
+      if(g.more) s+='<p>'+esc(g.more)+'</p>';
+      if(g.brands) s+='<details class="brands"><summary>適用飯店品牌（'+g.brands.length+'）</summary><div class="chips">'+g.brands.map(x=>x.split('|')[0]).map(n=>'<button type="button" class="chip" data-q="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div></details>';
+      if(b==='daily' && g.label==='日常採買') s+='<p>全家、7-11 限用台新Pay 付款。</p>';
+      if(g.label==='全臺餐飲') s+='<p>任何國內餐廳都算（不含餐券）。下面是本頁收錄、會直接判斷為餐飲業的連鎖品牌；店名含「牛肉麵、火鍋、燒肉、咖啡廳」等字也會判斷為餐飲。</p>'+
+        RESTAURANTS.map(([grp,names])=>'<details class="brands"><summary>'+esc(grp)+'（'+names.length+'）</summary><div class="chips">'+names.map(x=>x.split('|')[0]).map(n=>'<button type="button" class="chip" data-q="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div></details>').join('');
+      return s+'</div>';
+    }).join('');
+    if(b==='pay') body+='<div class="og" style="--c:var(--b-pay)"><h3><span>LINE Pay、全盈+Pay 綁定支付</span><span class="r">2.3%</span></h3></div>';
+    return '<details class="ben" style="--c:var(--b-'+b+')"><summary><span class="tg" aria-hidden="true"></span><span class="sm-l"><span class="sm-n">'+BEN[b].n+'</span><span class="sm-s">'+esc(BEN[b].sub)+'</span></span><span class="sm-r">'+BEN[b].top+'</span><span class="chev" aria-hidden="true"></span></summary>'+body+'</details>';
+  }).join('');
+}
+
+/* ---------- 狀態與事件 ---------- */
+const $q=document.getElementById('q'), $clear=document.getElementById('clear'), $hol=document.getElementById('hol'), $ask=document.getElementById('ask');
+const day=new Date().getDay(), weekend=day===0||day===6;
+const st={pay:'card',hol:weekend};
+try{const p=localStorage.getItem('richart-pay'); if(p && PAY[p]) st.pay=p;}catch(e){}
+function syncControls(){
+  document.querySelectorAll('#pay button').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.pay===st.pay)));
+  $hol.setAttribute('aria-pressed',String(st.hol));
+  document.getElementById('hol-note').textContent=weekend?'（今天是週末）':'（國定假日請手動開啟）';
+}
+document.getElementById('pay').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-pay]'); if(!b) return;
+  st.pay=b.dataset.pay; try{localStorage.setItem('richart-pay',st.pay);}catch(err){}
+  syncControls(); render();
+});
+document.getElementById('pay').addEventListener('keydown',e=>{
+  const keys=Object.keys(PAY); let i=keys.indexOf(st.pay);
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') i=(i+1)%keys.length; else if(e.key==='ArrowLeft'||e.key==='ArrowUp') i=(i+keys.length-1)%keys.length; else return;
+  e.preventDefault(); st.pay=keys[i]; try{localStorage.setItem('richart-pay',st.pay);}catch(err){}
+  syncControls(); render(); document.getElementById('pay-'+st.pay).focus();
+});
+$hol.addEventListener('click',()=>{st.hol=!st.hol; syncControls(); render();});
+/* 輸入完成（按搜尋或收起鍵盤）且不適用時，跳出詢問視窗 */
+let downOnControl=false;
+document.addEventListener('pointerdown',e=>{downOnControl=!!e.target.closest('button,a,summary,input,label,[data-q]');},true);
+$q.addEventListener('input',()=>{downOnControl=false; render();});
+$q.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  e.preventDefault(); downOnControl=true; $q.blur(); maybeAsk();
+});
+$q.addEventListener('blur',()=>{setTimeout(()=>{ if(document.activeElement===$q) return; if(downOnControl){downOnControl=false; return;} maybeAsk(); },150);});
+$clear.addEventListener('click',()=>{$q.value='';render();$q.focus();});
+$ask.addEventListener('click',e=>{
+  const b=e.target.closest('[data-ask]');
+  if(b){ const v=b.dataset.ask; closeAsk(v==='later'); if(v==='yes') setMark(askName,true); else if(v==='no') setMark(askName,false); return; }
+  if(e.target===$ask) closeAsk(true);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$ask.hidden) closeAsk(true); });
+document.addEventListener('click',e=>{
+  if($ask.contains(e.target)) return;
+  const sm=e.target.closest('[data-setmark]'); if(sm){ setMark(sm.dataset.name, sm.dataset.setmark==='1'); return; }
+  const um=e.target.closest('[data-unmark]'); if(um){ removeMark(um.dataset.unmark); return; }
+  const c=e.target.closest('[data-q]'); if(!c) return;
+  $q.value=c.dataset.q; render();
+  const bar=document.querySelector('.searchbar');
+  const y=document.getElementById('out').getBoundingClientRect().top+window.scrollY-bar.offsetHeight-8;
+  window.scrollTo({top:Math.max(0,y),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+});
+window.__richart={search,evaluate,M,st};
+rebuildMarks(); buildOverview(); syncControls(); render();
+})();
+</script>
+
+</body>
+</html>
